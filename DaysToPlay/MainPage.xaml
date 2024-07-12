@@ -1,0 +1,95 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:local="clr-namespace:DaysToPlay"
+             xmlns:viewModels="clr-namespace:DaysToPlay.ViewModels"
+             x:Class="DaysToPlay.MainPage"
+             Title="DaysToPlay">
+
+    <ContentPage.BindingContext>
+        <viewModels:MainViewModel />
+    </ContentPage.BindingContext>
+
+    <ScrollView Background="Black">
+        <StackLayout Spacing="15">
+            <Label Text="DaysToPlay" FontSize="32" HorizontalOptions="Center" FontAttributes="Bold" TextColor="White" />
+
+            <StackLayout>
+                <Label Text="Log Period" FontAttributes="Bold" TextColor="White" />
+                <StackLayout Orientation="Horizontal">
+                    <StackLayout>
+                        <Label Text="Start Date" TextColor="White" />
+                        <DatePicker Date="{Binding CurrentPeriod.StartDate}" />
+                    </StackLayout>
+                    <StackLayout>
+                        <Label Text="End Date" TextColor="White" />
+                        <DatePicker Date="{Binding CurrentPeriod.EndDate}" />
+                    </StackLayout>
+                </StackLayout>
+                <Button Text="Log Period" Command="{Binding LogPeriodCommand}" />
+            </StackLayout>
+
+            <StackLayout>
+                <Label Text="Average Cycle Length (days)" TextColor="White" />
+                <Label Text="{Binding MenstrualCycle.CycleLength}" TextColor="White" />
+
+                <Label Text="Average Period Length (days)" TextColor="White" />
+                <Label Text="{Binding AveragePeriodLength}" TextColor="White" />
+            </StackLayout>
+
+            <StackLayout>
+                <Label Text="Next Period Start Date" TextColor="White" />
+                <Label Text="{Binding NextPeriodStartDate, StringFormat='{}{0:MMMM dd, yyyy}'}" TextColor="White" />
+            </StackLayout>
+
+            <StackLayout>
+                <Label Text="Ovulation Date" TextColor="White" />
+                <Label Text="{Binding OvulationDate, StringFormat='{}{0:MMMM dd, yyyy}'}" TextColor="White" />
+
+                <Label Text="Fertile Window" TextColor="White" />
+                <Label>
+                    <Label.FormattedText>
+                        <FormattedString>
+                            <Span Text="{Binding FertileStartDate, StringFormat='{}{0:MMMM dd, yyyy}'}" TextColor="White" />
+                            <Span Text=" - " TextColor="White" />
+                            <Span Text="{Binding FertileEndDate, StringFormat='{}{0:MMMM dd, yyyy}'}" TextColor="White" />
+                        </FormattedString>
+                    </Label.FormattedText>
+                </Label>
+
+                <Label Text="Best Days to Get Pregnant" FontAttributes="Bold" TextColor="White" />
+                <CollectionView ItemsSource="{Binding FertileDays}">
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate>
+                            <Label Text="{Binding ., StringFormat='{}{0:MMMM dd, yyyy}'}" TextColor="White" />
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+
+                <Label Text="Safe Days to Avoid Pregnancy" FontAttributes="Bold" TextColor="White" />
+                <CollectionView ItemsSource="{Binding SafeDays}">
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate>
+                            <Label Text="{Binding ., StringFormat='{}{0:MMMM dd, yyyy}'}" TextColor="White" />
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+            </StackLayout>
+
+            <StackLayout>
+                <Label Text="Logged Periods" FontAttributes="Bold" TextColor="White" />
+                <CollectionView ItemsSource="{Binding MenstrualCycle.Periods}">
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate>
+                            <StackLayout Orientation="Horizontal">
+                                <Label Text="{Binding StartDate, StringFormat='Start: {0:MMMM dd, yyyy}'}" TextColor="White" />
+                                <Label Text=" - " TextColor="White" />
+                                <Label Text="{Binding EndDate, StringFormat='End: {0:MMMM dd, yyyy}'}" TextColor="White" />
+                            </StackLayout>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+            </StackLayout>
+        </StackLayout>
+    </ScrollView>
+</ContentPage>

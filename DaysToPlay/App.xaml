@@ -1,0 +1,54 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<Application xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="DaysToPlay.App">
+    <Application.Resources>
+        <!-- Application resource dictionary -->
+        <ResourceDictionary>
+            <!-- Page style -->
+            <Style TargetType="ContentPage">
+                <Setter Property="BackgroundColor" Value="Black" />
+                <Setter Property="Padding" Value="20" />
+            </Style>
+
+            <!-- Label style -->
+            <Style TargetType="Label">
+                <Setter Property="TextColor" Value="White" />
+                <Setter Property="FontSize" Value="18" />
+                <Setter Property="Margin" Value="5,10" />
+            </Style>
+
+            <!-- Button style -->
+            <Style TargetType="Button">
+                <Setter Property="TextColor" Value="White" />
+                <Setter Property="BackgroundColor" Value="#1E88E5" />
+                <!-- Blue button color -->
+                <Setter Property="FontSize" Value="18" />
+                <Setter Property="CornerRadius" Value="10" />
+                <Setter Property="Margin" Value="5,10" />
+                <Setter Property="Padding" Value="10" />
+            </Style>
+
+            <!-- DatePicker style -->
+            <Style TargetType="DatePicker">
+                <Setter Property="TextColor" Value="White" />
+                <Setter Property="BackgroundColor" Value="#333333" />
+                <!-- Dark gray background -->
+                <Setter Property="Margin" Value="5,10" />
+            </Style>
+
+            <!-- Entry style -->
+            <Style TargetType="Entry">
+                <Setter Property="TextColor" Value="White" />
+                <Setter Property="BackgroundColor" Value="#333333" />
+                <!-- Dark gray background -->
+                <Setter Property="Margin" Value="5,10" />
+            </Style>
+
+            <!-- CollectionView style -->
+            <Style TargetType="CollectionView">
+                <Setter Property="Margin" Value="5,10" />
+            </Style>
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>
