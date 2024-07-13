@@ -3,8 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:local="clr-namespace:DaysToPlay"
              xmlns:viewModels="clr-namespace:DaysToPlay.ViewModels"
-             x:Class="DaysToPlay.MainPage"
-             Title="DaysToPlay">
+             x:Class="DaysToPlay.MainPage">
 
     <ContentPage.BindingContext>
         <viewModels:MainViewModel />
@@ -12,27 +11,50 @@
 
     <ScrollView Background="Black">
         <StackLayout Spacing="15">
-            <Label Text="DaysToPlay" FontSize="32" HorizontalOptions="Center" FontAttributes="Bold" TextColor="White" />
+            <Label Text="Days To Play" FontSize="32" HorizontalOptions="Center" FontAttributes="Bold" TextColor="White" />
 
             <StackLayout>
-                <Label Text="Log Period" FontAttributes="Bold" TextColor="White" />
+                <Label Text="Enter the past 2 periods below" TextColor="White"/>
                 <StackLayout Orientation="Horizontal">
                     <StackLayout>
-                        <Label Text="Start Date" TextColor="White" />
-                        <DatePicker Date="{Binding CurrentPeriod.StartDate}" />
+                        <Label Text="START" TextColor="White"/>
+                        <DatePicker Date="{Binding CurrentPeriod.StartDate}" BackgroundColor="Black" TextColor="White"/>
                     </StackLayout>
                     <StackLayout>
-                        <Label Text="End Date" TextColor="White" />
-                        <DatePicker Date="{Binding CurrentPeriod.EndDate}" />
+                        <Label Text="END" TextColor="White" />
+                        <DatePicker Date="{Binding CurrentPeriod.EndDate}" BackgroundColor="Black" TextColor="WhiteSmoke"/>
+                    </StackLayout>
+                    <StackLayout>
+                        <Label Text="LENGTH" TextColor="White" />
+                        <Entry Text="{Binding CurrentPeriod.Length}" Keyboard="Numeric" BackgroundColor="Black"/>
                     </StackLayout>
                 </StackLayout>
-                <Button Text="Log Period" Command="{Binding LogPeriodCommand}" />
+                <Button Text="Log Period" Command="{Binding LogPeriodCommand}"/>
             </StackLayout>
 
             <StackLayout>
-                <Label Text="Average Cycle Length (days)" TextColor="White" />
-                <Label Text="{Binding MenstrualCycle.CycleLength}" TextColor="White" />
+                <Label Text="Logged Periods" FontAttributes="Bold" TextColor="Gray" />
+                <CollectionView ItemsSource="{Binding LoggedPeriods}">
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <Label Text="{Binding StartDate, StringFormat='{0:MMMM dd, yyyy}'}" TextColor="White" Grid.Column="0"/>
+                                <Label Text="{Binding EndDate, StringFormat='{0:MMMM dd, yyyy}'}" TextColor="White" Grid.Column="1"/>
+                                <Label Text="{Binding Length}" TextColor="White" Grid.Column="2"/>
+                            </Grid>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+            </StackLayout>
 
+            <StackLayout>
+                <Label Text="Avg Cycle Length (days)" TextColor="White" />
+                <Label Text="{Binding MenstrualCycle.CycleLength}" TextColor="White" />
                 <Label Text="Average Period Length (days)" TextColor="White" />
                 <Label Text="{Binding AveragePeriodLength}" TextColor="White" />
             </StackLayout>
@@ -45,7 +67,6 @@
             <StackLayout>
                 <Label Text="Ovulation Date" TextColor="White" />
                 <Label Text="{Binding OvulationDate, StringFormat='{}{0:MMMM dd, yyyy}'}" TextColor="White" />
-
                 <Label Text="Fertile Window" TextColor="White" />
                 <Label>
                     <Label.FormattedText>
@@ -56,39 +77,50 @@
                         </FormattedString>
                     </Label.FormattedText>
                 </Label>
-
-                <Label Text="Best Days to Get Pregnant" FontAttributes="Bold" TextColor="White" />
-                <CollectionView ItemsSource="{Binding FertileDays}">
-                    <CollectionView.ItemTemplate>
-                        <DataTemplate>
-                            <Label Text="{Binding ., StringFormat='{}{0:MMMM dd, yyyy}'}" TextColor="White" />
-                        </DataTemplate>
-                    </CollectionView.ItemTemplate>
-                </CollectionView>
-
-                <Label Text="Safe Days to Avoid Pregnancy" FontAttributes="Bold" TextColor="White" />
-                <CollectionView ItemsSource="{Binding SafeDays}">
-                    <CollectionView.ItemTemplate>
-                        <DataTemplate>
-                            <Label Text="{Binding ., StringFormat='{}{0:MMMM dd, yyyy}'}" TextColor="White" />
-                        </DataTemplate>
-                    </CollectionView.ItemTemplate>
-                </CollectionView>
             </StackLayout>
 
+            <!-- Custom Calendar Implementation -->
             <StackLayout>
-                <Label Text="Logged Periods" FontAttributes="Bold" TextColor="White" />
-                <CollectionView ItemsSource="{Binding MenstrualCycle.Periods}">
-                    <CollectionView.ItemTemplate>
-                        <DataTemplate>
-                            <StackLayout Orientation="Horizontal">
-                                <Label Text="{Binding StartDate, StringFormat='Start: {0:MMMM dd, yyyy}'}" TextColor="White" />
-                                <Label Text=" - " TextColor="White" />
-                                <Label Text="{Binding EndDate, StringFormat='End: {0:MMMM dd, yyyy}'}" TextColor="White" />
-                            </StackLayout>
-                        </DataTemplate>
-                    </CollectionView.ItemTemplate>
-                </CollectionView>
+                <Label Text="Calendar" FontAttributes="Bold" TextColor="White"/>
+                <Grid x:Name="CalendarGrid">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                </Grid>
+            </StackLayout>
+
+            <!-- Tips Section -->
+            <StackLayout Padding="10" BackgroundColor="#333333" Margin="0,20,0,0">
+                <Label Text="Tips for Safe Sex During Menstruation" FontAttributes="Bold" FontSize="20" TextColor="White" HorizontalOptions="Center" />
+                <Label Text="Understanding the Menstrual Cycle" FontAttributes="Bold" TextColor="White" />
+                <Label Text="1. Menstrual Phase: The period itself, usually lasting 3-7 days." TextColor="White" />
+                <Label Text="2. Follicular Phase: Begins on the first day of menstruation and lasts until ovulation." TextColor="White" />
+                <Label Text="3. Ovulation: Release of an egg from the ovary, typically around the midpoint of the cycle." TextColor="White" />
+                <Label Text="4. Luteal Phase: Post-ovulation phase leading up to the next period." TextColor="White" />
+
+                <Label Text="Pregnancy Risk During Menstruation" FontAttributes="Bold" TextColor="White" />
+                <Label Text="1. Low Probability but Not Impossible: For those with a regular 28-day cycle, the chances of getting pregnant from intercourse during the menstrual phase are low." TextColor="White" />
+                <Label Text="2. Sperm Lifespan: Sperm can live inside the female reproductive tract for up to 5 days. Having sex towards the end of your period could result in sperm surviving until ovulation." TextColor="White" />
+                <Label Text="3. Irregular Cycles: For individuals with irregular cycles, predicting the safe days becomes more difficult." TextColor="White" />
+
+                <Label Text="Safe Sex Practices" FontAttributes="Bold" TextColor="White" />
+                <Label Text="1. Contraception: Use reliable contraception methods such as condoms, birth control pills, IUDs, etc." TextColor="White" />
+                <Label Text="2. STI Prevention: Condoms are also essential for reducing the risk of sexually transmitted infections (STIs)." TextColor="White" />
+
+                <Label Text="Summary" FontAttributes="Bold" TextColor="White" />
+                <Label Text="1. During Period: The risk of getting pregnant from sex during your period is generally low, especially in the early days of menstruation." TextColor="White" />
+                <Label Text="2. Cycle Variation: Irregular cycles can complicate this general rule." TextColor="White" />
+                <Label Text="3. Contraception: Using contraception is the best way to prevent pregnancy and protect against STIs." TextColor="White" />
+
+                <Label Text="Recommendations" FontAttributes="Bold" TextColor="White" />
+                <Label Text="1. Track Your Cycle: Use apps or calendars to monitor your menstrual cycle and predict ovulation." TextColor="White" />
+                <Label Text="2. Consult Healthcare Providers: For personalized advice and to explore contraception options, consult a healthcare professional." TextColor="White" />
             </StackLayout>
         </StackLayout>
     </ScrollView>

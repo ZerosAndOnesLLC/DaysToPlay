@@ -14,5 +14,6 @@ namespace DaysToPlay.Models
     {
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
+        public string Length => ((EndDate - StartDate).Days + 1).ToString() + " Day(s)";
     }
 }

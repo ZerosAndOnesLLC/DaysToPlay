@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Windows.Input;
 using DaysToPlay.Models;
@@ -11,6 +13,7 @@ namespace DaysToPlay.ViewModels
     public class MainViewModel : INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler PropertyChanged;
+        public event Action PeriodsUpdated;
 
         private MenstrualCycle _menstrualCycle;
         public MenstrualCycle MenstrualCycle
@@ -32,24 +35,30 @@ namespace DaysToPlay.ViewModels
         public double AveragePeriodLength { get; private set; }
         public DateTime NextPeriodStartDate { get; private set; }
 
-        public List<DateTime> FertileDays { get; private set; }
-        public List<DateTime> SafeDays { get; private set; }
+        public ObservableCollection<DateTime> FertileDays { get; private set; }
+        public ObservableCollection<DateTime> SafeDays { get; private set; }
+        public ObservableCollection<Period> LoggedPeriods { get; private set; }
 
         public MainViewModel()
         {
             MenstrualCycle = new MenstrualCycle();
             CurrentPeriod = new Period { StartDate = DateTime.Today, EndDate = DateTime.Today };
             LogPeriodCommand = new Command(OnLogPeriod);
+            LoggedPeriods = new ObservableCollection<Period>();
+            FertileDays = new ObservableCollection<DateTime>();
+            SafeDays = new ObservableCollection<DateTime>();
         }
 
         private void OnLogPeriod()
         {
-            Console.WriteLine("Logging period: Start - " + CurrentPeriod.StartDate + ", End - " + CurrentPeriod.EndDate);
+            Debug.WriteLine("Logging period: Start - " + CurrentPeriod.StartDate + ", End - " + CurrentPeriod.EndDate);
             MenstrualCycle.Periods.Add(new Period { StartDate = CurrentPeriod.StartDate, EndDate = CurrentPeriod.EndDate });
             CalculateAverageCycleLength();
             CalculateAveragePeriodLength();
             CalculateForecasts();
+            UpdateLoggedPeriods();
             OnPropertyChanged(nameof(MenstrualCycle));
+            PeriodsUpdated?.Invoke();
         }
 
         private void CalculateAverageCycleLength()
@@ -62,7 +71,7 @@ namespace DaysToPlay.ViewModels
                     .ToList();
 
                 MenstrualCycle.CycleLength = (int)cycleLengths.Average();
-                Console.WriteLine("Calculated average cycle length: " + MenstrualCycle.CycleLength);
+                Debug.WriteLine("Calculated average cycle length: " + MenstrualCycle.CycleLength);
                 OnPropertyChanged(nameof(MenstrualCycle.CycleLength));
             }
         }
@@ -76,26 +85,27 @@ namespace DaysToPlay.ViewModels
                     .ToList();
 
                 AveragePeriodLength = periodLengths.Average();
-                Console.WriteLine("Calculated average period length: " + AveragePeriodLength);
+                Debug.WriteLine("Calculated average period length: " + AveragePeriodLength);
                 OnPropertyChanged(nameof(AveragePeriodLength));
             }
         }
 
         private void CalculateForecasts()
         {
-            if (MenstrualCycle.Periods.Last().StartDate != DateTime.MinValue && MenstrualCycle.CycleLength > 0)
+            if (MenstrualCycle.Periods.Any() && MenstrualCycle.CycleLength > 0)
             {
                 try
                 {
-                    OvulationDate = CalculateOvulation(MenstrualCycle.Periods.Last().StartDate, MenstrualCycle.CycleLength);
+                    DateTime lastPeriodStart = MenstrualCycle.Periods.Last().StartDate;
+                    OvulationDate = CalculateOvulation(lastPeriodStart, MenstrualCycle.CycleLength);
                     (FertileStartDate, FertileEndDate) = CalculateFertileWindow(OvulationDate);
                     CalculateFertileDays(FertileStartDate, FertileEndDate);
-                    CalculateSafeDays(FertileStartDate, FertileEndDate, MenstrualCycle.Periods.Last().StartDate, MenstrualCycle.CycleLength);
-                    CalculateNextPeriodStartDate();
+                    CalculateSafeDays(FertileStartDate, FertileEndDate, lastPeriodStart, MenstrualCycle.CycleLength);
+                    CalculateNextPeriodStartDate(lastPeriodStart);
 
-                    Console.WriteLine("Calculated ovulation date: " + OvulationDate);
-                    Console.WriteLine("Fertile window: " + FertileStartDate + " - " + FertileEndDate);
-                    Console.WriteLine("Next period start date: " + NextPeriodStartDate);
+                    Debug.WriteLine("Calculated ovulation date: " + OvulationDate);
+                    Debug.WriteLine("Fertile window: " + FertileStartDate + " - " + FertileEndDate);
+                    Debug.WriteLine("Next period start date: " + NextPeriodStartDate);
 
                     OnPropertyChanged(nameof(OvulationDate));
                     OnPropertyChanged(nameof(FertileStartDate));
@@ -107,7 +117,7 @@ namespace DaysToPlay.ViewModels
                 catch (ArgumentOutOfRangeException ex)
                 {
                     // Handle the exception appropriately (e.g., log it, show a message to the user, etc.)
-                    Console.WriteLine($"Error calculating dates: {ex.Message}");
+                    Debug.WriteLine($"Error calculating dates: {ex.Message}");
                 }
             }
         }
@@ -136,17 +146,17 @@ namespace DaysToPlay.ViewModels
 
         private void CalculateFertileDays(DateTime fertileStart, DateTime fertileEnd)
         {
-            FertileDays = new List<DateTime>();
+            FertileDays.Clear();
             for (DateTime day = fertileStart; day <= fertileEnd; day = day.AddDays(1))
             {
                 FertileDays.Add(day);
             }
-            Console.WriteLine("Calculated fertile days: " + string.Join(", ", FertileDays));
+            Debug.WriteLine("Calculated fertile days: " + string.Join(", ", FertileDays));
         }
 
         private void CalculateSafeDays(DateTime fertileStart, DateTime fertileEnd, DateTime lastPeriodStart, int cycleLength)
         {
-            SafeDays = new List<DateTime>();
+            SafeDays.Clear();
             DateTime cycleEnd = lastPeriodStart.AddDays(cycleLength - 1);
             for (DateTime day = lastPeriodStart.AddDays(AveragePeriodLength + 1); day < fertileStart; day = day.AddDays(1))
             {
@@ -156,17 +166,26 @@ namespace DaysToPlay.ViewModels
             {
                 SafeDays.Add(day);
             }
-            Console.WriteLine("Calculated safe days: " + string.Join(", ", SafeDays));
+            Debug.WriteLine("Calculated safe days: " + string.Join(", ", SafeDays));
         }
 
-        private void CalculateNextPeriodStartDate()
+        private void CalculateNextPeriodStartDate(DateTime lastPeriodStart)
         {
-            if (MenstrualCycle.CycleLength > 0 && MenstrualCycle.Periods.Any())
+            if (MenstrualCycle.CycleLength > 0)
             {
-                DateTime lastPeriodStart = MenstrualCycle.Periods.Last().StartDate;
                 NextPeriodStartDate = lastPeriodStart.AddDays(MenstrualCycle.CycleLength);
-                Console.WriteLine("Calculated next period start date: " + NextPeriodStartDate);
+                Debug.WriteLine("Calculated next period start date: " + NextPeriodStartDate);
             }
+        }
+
+        private void UpdateLoggedPeriods()
+        {
+            LoggedPeriods.Clear();
+            foreach (var period in MenstrualCycle.Periods)
+            {
+                LoggedPeriods.Add(period);
+            }
+            OnPropertyChanged(nameof(LoggedPeriods));
         }
 
         protected virtual void OnPropertyChanged(string propertyName)
